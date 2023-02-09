@@ -230,7 +230,11 @@ ui <- fluidPage(
   titlePanel("L’étude sur les mariages dans le Nord en 2018"),
   hr(),
   
+  radioButtons("sexe", label = h3("Gerne"),
+               choices = list("Homme" = 1, "Femme" = 2, "Homme et Femme" = 3), 
+               selected = 1),
   
+  hr(),
   
   mainPanel(
     tabsetPanel(type = "tabs",
@@ -242,7 +246,9 @@ ui <- fluidPage(
 
 ### Server logic
 server <- function(input, output) {
-  
+  sexe <- eventReactive(input$go, {
+    input$sexe 
+  })
   
 }
 
