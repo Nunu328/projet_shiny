@@ -14,13 +14,18 @@
 #   +automatique
 #   +au moins d'une grapique
 
-library(shiny)
+
+
+
 
 ###nettoyer des bdds
 
 ##1: telecharger des library
+#install.packages("pacman") 
 library(tidyverse)
 library(questionr)
+library(shiny)
+
 
 ##2: telecharger une donnée
 mariage<-read.csv("FD_MAR_2018.csv", sep = ";", fileEncoding ="utf8" )
@@ -218,27 +223,29 @@ mariage_data <- mariage_data %>%
 
 ###telecharger des library
 library("shiny")
-library(datasets)
+library("datasets")
+library("pacman")
+
 
 ###telecharger un file csv mariage
 mariage2018<-read.csv("mariage2018.csv", sep = ",", fileEncoding ="utf8" )
 str(mariage2018)
 
 ###App
+
 ui <- fluidPage(
   #titre de l'app
   titlePanel("L’étude sur les mariages dans le Nord en 2018"),
   hr(),
   
-  radioButtons("sexe", label = h3("Gerne"),
-               choices = list("Homme" = 1, "Femme" = 2, "Homme et Femme" = 3), 
-               selected = 1),
-  
-  hr(),
   
   mainPanel(
     tabsetPanel(type = "tabs",
                 tabPanel("Data", dataTableOutput("outFile")),
+                checkboxGroupInput("sexe", label = h3("Sexe"), 
+                                   choices = list("Homme" = 1, "Femme" = 2, "H/F" = 3),
+                                   selected = 1),
+                plotOutput("mariage2018"),
                 tabPanel("Carte", h1("Carte de France")),
                 tabPanel("Visualisation", h1("Plot"))
     )
@@ -249,6 +256,7 @@ server <- function(input, output) {
   sexe <- eventReactive(input$go, {
     input$sexe 
   })
+  
   
 }
 
