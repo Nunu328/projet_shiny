@@ -242,7 +242,7 @@ ui <- fluidPage(
   mainPanel(
     tabsetPanel(type = "tabs",
                 tabPanel("Data", dataTableOutput("outFile")),
-                checkboxGroupInput("sexe", label = h3("Sexe"), 
+                checkboxGroupInput("sexe", label = h3("sexe"), 
                                    choices = list("Homme" = 1, "Femme" = 2, "H/F" = 3),
                                    selected = 1),
                 plotOutput("mariage2018"),
@@ -256,8 +256,15 @@ server <- function(input, output) {
   sexe <- eventReactive(input$go, {
     input$sexe 
   })
+
+  plot_1 <- reactive({
+    plot_func(param = "sexe")
+  })
   
-  
+  output$mariage2018 <- renderPlot({
+    sexe()
+  })  
+
 }
 
 
