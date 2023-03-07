@@ -216,57 +216,78 @@ mariage_data <- rio::import(here::here("mariage2018.csv")) %>%
 
 
 #########Application###########
-
-mariage_data <- mariage_data %>%
-  select(-newid) %>%
-  pivot_longer(cols = starts_with("malaria_"), names_to = "age_group", values_to = "cases_reported")
-
 ###telecharger des library
 library("shiny")
 library("datasets")
 library("pacman")
+library("DT")
 
+# Import data
+mariage_data <- rio::import(here::here("mariage2018.csv",fileEncoding="utf-8") %>% 
+                              as_tibble() %>%
+                              select(-newid) %>%
+                              pivot_longer(cols = starts_with("malaria_"), names_to = "age_group", values_to = "cases_reported"))
 
-###telecharger un file csv mariage
-mariage2018<-read.csv("mariage2018.csv", sep = ",", fileEncoding ="utf8" )
-str(mariage2018)
 
 ###App
 
+# Define UI
 ui <- fluidPage(
   #titre de l'app
   titlePanel("L’étude sur les mariages dans le Nord en 2018"),
   hr(),
   
-  
   mainPanel(
-    tabsetPanel(type = "tabs",
-                tabPanel("Data", dataTableOutput("outFile")),
-                checkboxGroupInput("sexe", label = h3("sexe"), 
-                                   choices = list("Homme" = 1, "Femme" = 2, "H/F" = 3),
-                                   selected = 1),
-                plotOutput("mariage2018"),
-                tabPanel("Carte", h1("Carte de France")),
-                tabPanel("Visualisation", h1("Plot"))
+    tabsetPanel(
+      type = "tabs",
+      tabPanel(
+        "Datatable",
+        mainPanel(
+          dataTableOutput("dataTable")
+        )
+      ),
+      tabPanel(
+        "Carte",
+        h1("Carte de France")
+      ),
+      tabPanel(
+        "Visualisation",
+        h1("Plot"),
+        checkboxGroupInput(
+          "sexe",
+          label = h3("Sexe"),
+          choices = list("Homme" = 1, "Femme" = 2, "H/F" = 3),
+          selected = 1
+        ),
+        plotOutput("mariagePlot")
+      )
     )
-  ))
+  )
+)
 
-### Server logic
+# Define server
 server <- function(input, output) {
-  sexe <- eventReactive(input$go, {
-    input$sexe 
-  })
-
-  plot_1 <- reactive({
-    plot_func(param = "sexe")
+  # Define reactive data
+  data <- reactive({
+    mariage_data
   })
   
-  output$mariage2018 <- renderPlot({
-    sexe()
-  })  
-
+  # Render data table
+  output$dataTable <- renderDataTable({
+    data()
+  })
+  
+  # Generate plot
+  plot_func <- function(param) {
+    ggplot(data(), aes_string(x = param)) +
+      geom_bar() +
+      labs(x = "Sexe", y = "Count")
+  }
+  
+  output$mariagePlot <- renderPlot({
+    plot_func("sexe")
+  })
 }
-
 
 # Run the app
 shinyApp(ui, server)
