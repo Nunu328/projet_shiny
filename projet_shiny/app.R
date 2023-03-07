@@ -221,7 +221,7 @@ library("shiny")
 library("datasets")
 library("pacman")
 library("DT")
-library("dplyr")
+#library("dplyr")->pout stats(sum,mean,min,max...)
 
 # Import data
 mariage_data <- rio::import(here::here("mariage2018.csv",fileEncoding="utf-8") %>% 
@@ -252,25 +252,32 @@ ui <- fluidPage(
           dataTableOutput("dataTable")
         )
       ),
-      
-      tabPanel(
-        "Statistiques",
-        
-
-      
-      tabPanel(
-        "Carte",
-        h1("Carte de France")
-      ),
       #Graphique
       tabPanel(
-        "Visualisation",
-        h1("Plot"),
-       
+        "Histogram",plotOutput("hist"), 
+        fluidRow(
+          column(3, htmlOutput("Hist.Bins")),
+          column(4, htmlOutput("Hist.X")),
+          column(4, htmlOutput("Hist.Fill"))
+        )
+      ),
+      tabPanel(
+        "Bar", plotOutput("bar"), #度数分布の表示
+        fluidRow(
+          column(4, htmlOutput("Bar.X")),
+          column(4, htmlOutput("Bar.Fil"))
+        ),
+        
+
+      tabPanel(
+        "Carte",
+        hr(),
       )
-    )
+      )
+      )
   )
-))
+  )
+
 
 # Define server
 server <- function(input, output) {
@@ -282,6 +289,44 @@ server <- function(input, output) {
   # Render data table
   output$dataTable <- renderDataTable({
     data()
+  })
+  
+  #Histogram
+  output$Hist.Bins <- renderUI({
+    sliderInput('hist.bins', 'bins', min=1, max=(round(nrow(data())/10)), value=(round(nrow(data())/20)))
+  })
+  
+  output$Hist.X <- renderUI({
+    selectInput('hist.x', 'x', names(data()))
+  })
+  
+  output$Hist.Fill <- renderUI({
+    selectInput('hist.fill', 'fill', c(None='None', names(data())))
+  })
+  
+  output$hist <- renderPlot({
+    g <- ggplot(data(), aes_string(x = input$hist.x)) + geom_histogram(bins = input$hist.bins)
+    if (input$hist.fill != 'None') {
+      g <- g + aes_string(fill = input$hist.fill)
+    }
+    print(g)
+  })
+  
+  #bar
+  output$Bar.X <- renderUI({
+    selectInput('bar.x', 'x', names(data()))
+  })
+  
+  output$Bar.Fil <- renderUI({
+    selectInput('bar.fil', 'fill', c(None='None', names(data())))
+  })
+  
+  output$bar <- renderPlot({
+    g <- ggplot(data(), aes_string(x = input$bar.x)) + geom_bar()
+    if (input$bar.fil != 'None') {
+      g <- g + aes_string(fill = input$bar.fil)
+    }
+    print(g)
   })
 
 }
