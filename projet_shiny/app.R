@@ -221,12 +221,17 @@ library("shiny")
 library("datasets")
 library("pacman")
 library("DT")
+library("dplyr")
 
 # Import data
 mariage_data <- rio::import(here::here("mariage2018.csv",fileEncoding="utf-8") %>% 
                               as_tibble() %>%
                               select(-newid) %>%
                               pivot_longer(cols = starts_with("malaria_"), names_to = "age_group", values_to = "cases_reported"))
+
+
+# Statistiques
+  
 
 
 ###App
@@ -243,27 +248,29 @@ ui <- fluidPage(
       tabPanel(
         "Datatable",
         mainPanel(
+          #if faut modifier le nom de colonne
           dataTableOutput("dataTable")
         )
       ),
+      
+      tabPanel(
+        "Statistiques",
+        
+
+      
       tabPanel(
         "Carte",
         h1("Carte de France")
       ),
+      #Graphique
       tabPanel(
         "Visualisation",
         h1("Plot"),
-        checkboxGroupInput(
-          "sexe",
-          label = h3("Sexe"),
-          choices = list("Homme" = 1, "Femme" = 2, "H/F" = 3),
-          selected = 1
-        ),
-        plotOutput("mariagePlot")
+       
       )
     )
   )
-)
+))
 
 # Define server
 server <- function(input, output) {
@@ -276,17 +283,7 @@ server <- function(input, output) {
   output$dataTable <- renderDataTable({
     data()
   })
-  
-  # Generate plot
-  plot_func <- function(param) {
-    ggplot(data(), aes_string(x = param)) +
-      geom_bar() +
-      labs(x = "Sexe", y = "Count")
-  }
-  
-  output$mariagePlot <- renderPlot({
-    plot_func("sexe")
-  })
+
 }
 
 # Run the app
