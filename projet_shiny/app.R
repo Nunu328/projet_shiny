@@ -201,8 +201,14 @@ mariage$DEPMAR <- fct_freq_dep(mariage$DEPMAR)
 mariage$DEPNAIS1  <- fct_freq_dep(mariage$DEPNAIS1)
 mariage$DEPNAIS2  <- fct_freq_dep(mariage$DEPNAIS2)
 
+head(mariage)
 
-write.csv(mariage,"mariage2018.csv",sep = ";", fileEncoding ="utf8")
+mariage<-mariage %>%
+  select(SEXE1,SEXE2,AGE1,AGE2,INDNAT1,INDNAT2, ETAMAT1, ETAMAT2,DEPMAR,DEPNAIS1,DEPNAIS2,DEPNAIS1,DEPNAIS2, NBENFCOM )
+
+head(mariage)
+
+write.csv(mariage,"mariage2018.csv", sep = ";", fileEncoding ="utf8")
 
 #########dataframe#####
 
@@ -224,13 +230,51 @@ library("DT")
 #library("dplyr")->pout stats(sum,mean,min,max...)
 
 # Import data
-mariage_data <- rio::import(here::here("mariage2018.csv",fileEncoding="utf-8") %>% 
-                              as_tibble() %>%
-                              select(-newid) %>%
-                              pivot_longer(cols = starts_with("malaria_"), names_to = "age_group", values_to = "cases_reported"))
-
+mariage_data <- rio::import(here::here("mariage2018.csv"))%>% 
+                              
+head(mariage_data)
 
 # Statistiques
+summary(mariage_data$AGE1)  
+#  Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+#  17.00   30.00   35.00   38.57   45.00   98.00 
+summary(mariage_data$AGE2)
+# Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+# 17.0    28.0    33.0    36.5    43.0    92.0 
+
+ana_stat <-function(mariage_data) {
+  classes <- mariage_data %>% summarise_all(class) %>% t()
+  means <- mariage_data %>% select(!where(is.character)) %>% summarise_all(mean, na.rm=TRUE) %>% t()
+  vars <- mariage_data %>% select(!where(is.character)) %>% summarise_all(var, na.rm=TRUE) %>% t()
+  sds <- mariage_data %>% select(!where(is.character)) %>% summarise_all(sd, na.rm=TRUE) %>% t()
+  qs <- mariage_data %>% select(!where(is.character)) %>% summarise_all(quantile, na.rm=TRUE) %>% t()
+  colnames(qs) <- c("min", "q14", "median", "q34", "max")
+  is.nas <- df %>% is.na %>% as.data.frame %>% summarise_all(sum) %>% t()
+  
+  stat.1 <- data.frame(
+    rownames=rownames(classes),
+    classes=classes,
+    is.nas=is.nas,
+    is.not.nas=nrow(mariage_data)-is.nas
+  )
+  
+  stat.2 <- data.frame(
+    rownames=rownames(means),
+    means=means,
+    vars=vars,
+    sds=sds,
+    qs
+  )
+  
+  stat <- full_join(stat.1, stat.2, by="rownames")
+  
+  return(stat)
+}
+
+ana_cor <- function(mariage_data) {
+  r <- mariage_data %>% select(!where(is.character)) %>% cor
+  return(r)
+}
   
 
 
@@ -241,6 +285,10 @@ ui <- fluidPage(
   #titre de l'app
   titlePanel("L’étude sur les mariages dans le Nord en 2018"),
   hr(),
+  h4("Cette application est basée sur les données de mariage en 2018 en France par INSEE"),
+  br(),
+  sidebarLayout(
+    sidebarPanel("Utilisation ")),
   
   mainPanel(
     tabsetPanel(
@@ -248,10 +296,15 @@ ui <- fluidPage(
       tabPanel(
         "Datatable",
         mainPanel(
-          #if faut modifier le nom de colonne
+          #il faut modifier le nom de colonne
           dataTableOutput("dataTable")
         )
       ),
+      #Stat
+      tabPanel(
+        "Statistique", dataTableOutput("outstat")),
+      tabPanel("Correlation", dataTableOutput("outCor")),
+      
       #Graphique
       tabPanel(
         "Histogram",plotOutput("hist"), 
@@ -262,34 +315,72 @@ ui <- fluidPage(
         )
       ),
       tabPanel(
-        "Bar", plotOutput("bar"), #度数分布の表示
+        "Bar", plotOutput("bar"), 
         fluidRow(
           column(4, htmlOutput("Bar.X")),
           column(4, htmlOutput("Bar.Fil"))
         ),
         
-
-      tabPanel(
-        "Carte",
-        hr(),
+        
+        tabPanel(
+          "Carte",
+          hr(),
+        )
       )
-      )
-      )
+    )
   )
-  )
+)
 
 
 # Define server
+
 server <- function(input, output) {
   # Define reactive data
   data <- reactive({
     mariage_data
   })
   
+  #logique de stat
+  stat <- reactive({
+    tmp <- mariage_data
+    if (is.null(tmp)) {
+      return(NULL)
+    } else {
+      res <- ana_stat(tmp)
+      return(res)
+    }
+  })
+  
+  r <- reactive({
+    tmp <- mariage_data
+    if (is.null(tmp)) {
+      return(NULL)
+    } else {
+      res <- ana_cor(tmp)
+      return(res)
+    }
+  })
+  
+  
   # Render data table
   output$dataTable <- renderDataTable({
     data()
   })
+  
+  #Statistique
+  output$outStat <- DT::renderDataTable({
+    data.frame(stat())
+  }, extensions = c('Buttons'), 
+  options = list(dom = 'Blfrtip',
+                 buttons = c('csv', 'excel', 'pdf'))
+  )
+  
+  output$outCor <- DT::renderDataTable({
+    data.frame(r())
+  }, extensions = c('Buttons'), 
+  options = list(dom = 'Blfrtip',
+                 buttons = c('csv', 'excel', 'pdf'))
+  )
   
   #Histogram
   output$Hist.Bins <- renderUI({
@@ -328,8 +419,9 @@ server <- function(input, output) {
     }
     print(g)
   })
-
+  
 }
 
 # Run the app
 shinyApp(ui, server)
+
