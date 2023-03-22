@@ -288,7 +288,8 @@ ui <- fluidPage(
   h4("Cette application est basée sur les données de mariage en 2018 en France par INSEE"),
   br(),
   sidebarLayout(
-    sidebarPanel("Utilisation ")),
+    sidebarPanel(
+      h5("Utilisation "))),
   
   mainPanel(
     tabsetPanel(
@@ -301,9 +302,8 @@ ui <- fluidPage(
         )
       ),
       #Stat
-      tabPanel(
-        "Statistique", dataTableOutput("outstat")),
-      tabPanel("Correlation", dataTableOutput("outCor")),
+      tabPanel("Statistique", tableOutput("outstat")),
+      tabPanel("Correlation", tableOutput("outCor")),
       
       #Graphique
       tabPanel(
