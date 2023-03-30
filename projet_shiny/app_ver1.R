@@ -280,56 +280,59 @@ ana_cor <- function(mariage_data) {
 
 ###App
 
+# Define UI
 ui <- fluidPage(
   #titre de l'app
   titlePanel("L’étude sur les mariages dans le Nord en 2018"),
   hr(),
-  p("Cette application est basée sur les données de mariage en 2018 en France par INSEE"),
+  h4("Cette application est basée sur les données de mariage en 2018 en France par INSEE"),
   br(),
+  sidebarLayout(
+    sidebarPanel(
+      h5("Utilisation "))),
   
   mainPanel(
-    tabsetPanel(type = "tabs",
-                tabPanel("Data Table",
-                         
-                         mainPanel(
-                           #il faut modifier le nom de colonne
-                           dataTableOutput("dataTable")
-                         )),
-                tabPanel("Statistique", 
-                         h1("Statistique value"),
-                         sidebarLayout(
-                           sidebarPanel(
-                             selectInput("SEXE1", label = "sexe", choices = c("Femme", "Homme"))
-                           ),
-                           mainPanel(
-                             tableOutput(outputId = "countTable")
-                           )
-                         )
-                ),
-                #Hist     
-                tabPanel("Histogram", h1("Histogram"),
-                         plotOutput("hist"), 
-                         fluidRow(
-                           column(3, htmlOutput("hist.Bins")),
-                           column(4, htmlOutput("hist.X")),
-                           column(4, htmlOutput("hist.Fill"))
-                         )
-                )),
-    #Bar
-    tabPanel("bar", h1("Bar"),
-             plotOutput("bar"), 
-             fluidRow(
-               column(4, htmlOutput("bar.X")),
-               column(4, htmlOutput("bar.Fil"))
-             )
-    ),
-    tabPanel("Carte",h1("Carte"))
+    tabsetPanel(
+      type = "tabs",
+      tabPanel(
+        "Datatable",
+        mainPanel(
+          #il faut modifier le nom de colonne
+          dataTableOutput("dataTable")
+        )
+      ),
+      #Stat
+      tabPanel("Statistique", tableOutput("outstat")),
+      tabPanel("Correlation", tableOutput("outCor")),
+      
+      #Graphique
+      tabPanel(
+        "Histogram",plotOutput("hist"), 
+        fluidRow(
+          column(3, htmlOutput("Hist.Bins")),
+          column(4, htmlOutput("Hist.X")),
+          column(4, htmlOutput("Hist.Fill"))
+        )
+      ),
+      tabPanel(
+        "Bar", plotOutput("bar"), 
+        fluidRow(
+          column(4, htmlOutput("Bar.X")),
+          column(4, htmlOutput("Bar.Fil"))
+        ),
+        
+        
+        tabPanel(
+          "Carte",
+          hr(),
+        )
+      )
+    )
   )
 )
 
 
-
-
+# Define server
 
 server <- function(input, output) {
   # Define reactive data
@@ -337,35 +340,58 @@ server <- function(input, output) {
     mariage_data
   })
   
+  #logique de stat
+  stat <- reactive({
+    tmp <- mariage_data
+    if (is.null(tmp)) {
+      return(NULL)
+    } else {
+      res <- ana_stat(tmp)
+      return(res)
+    }
+  })
+  
+  r <- reactive({
+    tmp <- mariage_data
+    if (is.null(tmp)) {
+      return(NULL)
+    } else {
+      res <- ana_cor(tmp)
+      return(res)
+    }
+  })
+  
+  
   # Render data table
   output$dataTable <- renderDataTable({
     data()
   })
   
   #Statistique
-  count <- reactive({
-    mariage_data %>%
-      filter(SEXE1 == input$SEXE1) %>%
-      group_by(AGE1) %>%
-      summarize(count = n())
-  })
+  output$outStat <- DT::renderDataTable({
+    data.frame(stat())
+  }, extensions = c('Buttons'), 
+  options = list(dom = 'Blfrtip',
+                 buttons = c('csv', 'excel', 'pdf'))
+  )
   
-  # Resultat
-  output$countTable <- renderTable({
-    count()
-  })
-  
+  output$outCor <- DT::renderDataTable({
+    data.frame(r())
+  }, extensions = c('Buttons'), 
+  options = list(dom = 'Blfrtip',
+                 buttons = c('csv', 'excel', 'pdf'))
+  )
   
   #Histogram
-  output$hist.Bins <- renderUI({
+  output$Hist.Bins <- renderUI({
     sliderInput('hist.bins', 'bins', min=1, max=(round(nrow(data())/10)), value=(round(nrow(data())/20)))
   })
   
-  output$hist.X <- renderUI({
+  output$Hist.X <- renderUI({
     selectInput('hist.x', 'x', names(data()))
   })
   
-  output$hist.Fill <- renderUI({
+  output$Hist.Fill <- renderUI({
     selectInput('hist.fill', 'fill', c(None='None', names(data())))
   })
   
@@ -378,11 +404,11 @@ server <- function(input, output) {
   })
   
   #bar
-  output$bar.X <- renderUI({
+  output$Bar.X <- renderUI({
     selectInput('bar.x', 'x', names(data()))
   })
   
-  output$bar.Fil <- renderUI({
+  output$Bar.Fil <- renderUI({
     selectInput('bar.fil', 'fill', c(None='None', names(data())))
   })
   
@@ -393,9 +419,6 @@ server <- function(input, output) {
     }
     print(g)
   })
-  
-  
-  
   
 }
 
