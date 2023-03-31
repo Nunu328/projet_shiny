@@ -238,6 +238,12 @@ pop_fr <- pop_fr %>%
 rename(pop_marage = pop_fr.x, pop_domicile = pop_fr.y, pop_nais1=pop_fr.x.x, pop_nais2=pop_fr.y.y,departement = DEP)
 
 
+#preparation de carte
+france<- map_data("france")
+View(france)
+
+table(france$region)
+
 
 #mariage<-mariage %>%
 #  select(SEXE1,SEXE2,AGE1,AGE2,INDNAT1,INDNAT2, ETAMAT1, ETAMAT2,dep_mariage_count,dep_domicile_count,dep_nais1_count,dep_nais2_count,NBENFCOM,AMAR,MMAR )
@@ -277,11 +283,7 @@ library("ggplot2")
 library("leaflet")
 library(magrittr)
 
-#preparation de carte
-france<- map_data("france")
-View(france)
 
-table(france$region)
 
 
 #app
@@ -294,8 +296,8 @@ ui <- fluidPage(
   br(),
   mainPanel(
     tabsetPanel(type = "tabs",
-                tabPanel("But", h1(kkkkkk),
-                         p(fffff)),
+                tabPanel("But", h1("title"),
+                         p("explication")),
                 
                 tabPanel("Data Table",
                          mainPanel(
@@ -306,13 +308,10 @@ ui <- fluidPage(
                          h1("Statistique value"),
                          sidebarLayout(
                            sidebarPanel(
-                             selectInput("col_select", "var_select", names(mariage_data))
-                           ),
+                             selectInput("col_select", "var_select", names(mariage_data))),
                            mainPanel(
-                             verbatimTextOutput("total")
-                           )
-                         )
-                ),
+                             verbatimTextOutput("total"))
+                         )),
                 #Hist(numeric)     
                 tabPanel("Histogram", h1("Histogram"),
                          plotOutput("hist"), 
@@ -322,39 +321,19 @@ ui <- fluidPage(
                              column(3, htmlOutput("hist.Bins")),
                              column(4, htmlOutput("hist.X")),
                              column(4, htmlOutput("hist.Fill"))
-                           )
-                         )
-                ),
-                
+                           ))),
                 #Bar
                 tabPanel("bar", h1("Bar"),
                          plotOutput("bar"), 
                          fluidRow(
                            column(4, htmlOutput("bar.X")),
                            column(4, htmlOutput("bar.Fil"))
-                         )
-                ),
-                tabPanel("Carte",
-                         sidebarLayout(
-                           sidebarPanel(
-                             h3("Carte de la France et la pop "),
-                             selectInput("dataset", "Choose a dataset (or a subset) :", 
-                                         choices = sort(c("all biggest cities", "Ile-de-France", "Provence-Alpes-Cote d'Azur", "Rhone-Alpes", 
-                                                          "Midi-Pyrenees", "Pays de la Loire", "Alsace", "Languedoc-Roussillon", "Aquitaine", "Nord-Pas-de-Calais")))
-                           ), 
-                           
-                           # MainPanel divided into 2 tabPanels
-                           mainPanel(
-                             tabsetPanel(
-                               tabPanel("Plot", h1("Carte"), leafletOutput("leafletMap", width = "100%", height="700")),
-                               tabPanel("Table", h1("Data"), tableOutput("table"))
-                             ) 
-                           )
-                         ))
-    ))
+                         )),
+                #Carte
+                tabPanel("Carte",h1("Carte"))
+    )
+  )
 )
-
-
 
 
 server <- function(input, output) {
@@ -430,53 +409,13 @@ server <- function(input, output) {
     print(g)
   })
   
-
+  
   #Carte
-  # Formatting PopUps
-  pop = within(pop, {
-    PopUp = paste(PopUp, pop$, df$Population, sep="<br>")
-  })
+  #montre la data pop_fr
   
-  ## Define a new icon 
-  cityLeafIcon <- makeIcon(
-    iconUrl = "www/city.png",
-    iconAnchorX = 10, iconAnchorY = 10,
-    shadowUrl = "www/city.png"
-  )
-  
-  # Define server logic 
-  shinyServer(function(input, output) {
-    datasetInput <- reactive({
-      switch(input$dataset,
-             "all biggest cities" = df,
-             "Ile-de-France" = subset(df, df$Region == "Ile-de-France"),
-             "Provence-Alpes-Cote d'Azur" = subset(df, df$Region == "Provence-Alpes-Cote d'Azur"),
-             "Rhone-Alpes"  = subset(df, df$Region == "Rhone-Alpes"),
-             "Midi-Pyrenees" = subset(df, df$Region == "Midi-Pyrenees"),
-             "Pays de la Loire" = subset(df, df$Region == "Pays de la Loire"),
-             "Alsace" = subset(df, df$Region == "Alsace"),
-             "Languedoc-Roussillon" = subset(df, df$Region == "Languedoc-Roussillon"),
-             "Aquitaine" = subset(df, df$Region == "Aquitaine"),
-             "Nord-Pas-de-Calais" = subset(df, df$Region == "Nord-Pas-de-Calais"))
-    })
-    
-    ## Show the entire table of our dataset
-    output$table <- renderTable({
-      datasetInput()[1:5]
-    })
-    
-    ## Create and show our Leaflet Map
-    output$leafletMap <- renderLeaflet({
-      df <- datasetInput()
-      map <- leaflet() %>% 
-        addTiles() %>% 
-        setView(1.846033, 46.97068, zoom = 6) %>% 
-        addMarkers(data = df, lng = ~ Longitude, lat = ~ Latitude, popup = df$PopUp, icon = cityLeafIcon)
-      map
-    })
-    
-  })
-  
+  #output$dataTablePop <- renderDataTable({
+   # pop()
+  #})
   
   
   
