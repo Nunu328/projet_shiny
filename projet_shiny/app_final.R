@@ -272,7 +272,7 @@ ui <- fluidPage(
   #titre de l'app
   titlePanel("L’étude sur les mariages dans en France en 2018"),
   hr(),
-  p("Cette application est basée sur les données de l'état civil en 2018 en France par INSEE"),
+  p("Cette application permet d'analyser l'état du mariage en France par Les mariages en 2018"),
   br(),
   mainPanel(
     tabsetPanel(type = "tabs",
@@ -280,6 +280,7 @@ ui <- fluidPage(
                          p("Nous avons décidé de faire une analyse quantitative sur les mariages célébrés."),
                          p("On va regarder les informations générales sur le jeu de données de l’état civil en 2018
                          concernant les mariages fourni par l’INSEE."),
+                         P("url:https://www.insee.fr/fr/statistiques/4273672?sommaire=4273674"),
                          hr(),
                          h2("Utilisation"),
                          p("La rubrique Data Table permet d'obtenir une vue détaillée des données utilisées."),
@@ -287,7 +288,8 @@ ui <- fluidPage(
                          La rubrique Bar permet d'afficher un diagramme en barres."),
                          p("Dans x, vous sélectionnez la variable qui sera l'axe des abscisses, et bar.Fil est le filtre."),
                          p("Enfin, La rubrique Carte affiche la population mariée par département."),
-                         hr(), 
+                         hr(),
+                         h2("Donnée et variables"),
                          p("Voici la liste des variables dans ce jeu des données:"),
                          p("1.AMAR Année de mariage"),
                          p("2.ANAIS1 Année de naissance du conjoint 1"),
@@ -313,7 +315,7 @@ ui <- fluidPage(
                            dataTableOutput("dataTable")
                          )),
                 tabPanel("Statistique", 
-                         h1("Statistique value"),
+                         p("Statistique value :Sélectionner une variable."),
                          sidebarLayout(
                            sidebarPanel(
                              selectInput("col_select", "choix de variable", names(mariage_data))),
@@ -322,7 +324,7 @@ ui <- fluidPage(
                          )),
                 
                 #Bar
-                tabPanel("Bar", h1("Bar"),
+                tabPanel("Bar", p("Un graphique à barres s'affiche ; sélectionnez une variable sur l'axe des x et filtrez les variables qui vous intéressent."),
                          plotOutput("bar"), 
                          fluidRow(
                            column(4, htmlOutput("bar.X")),
