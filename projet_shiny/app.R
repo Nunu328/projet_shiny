@@ -201,6 +201,9 @@ mariage$DEPMAR <- fct_freq_dep(mariage$DEPMAR)
 mariage$DEPNAIS1  <- fct_freq_dep(mariage$DEPNAIS1)
 mariage$DEPNAIS2  <- fct_freq_dep(mariage$DEPNAIS2)
 
+
+
+
 head(mariage)
 
 mariage<-mariage %>%
@@ -211,14 +214,17 @@ head(mariage)
 write.csv(mariage,"mariage2018.csv", sep = ";", fileEncoding ="utf8")
 
 #########dataframe#####
-
+setwd("C:/Users/white/OneDrive/Bureau/rh")
 #install.packages("Require")
 library(Require)
 library(lubridate)
 
+#install.packages("maps")
+library(maps)
+
+
 # lire de data
-mariage_data <- rio::import(here::here("mariage2018.csv")) %>% 
-  as_tibble()
+mariage_data<-read.csv("mariage2018.csv", sep = ",", fileEncoding ="utf8" )
 
 
 #########Application###########
@@ -227,58 +233,16 @@ library("shiny")
 library("datasets")
 library("pacman")
 library("DT")
-#library("dplyr")->pout stats(sum,mean,min,max...)
+library("dplyr")
+library("ggplot2")
+library("leaflet")
 
-# Import data
-mariage_data <- rio::import(here::here("mariage2018.csv"))%>% 
-  
-  head(mariage_data)
-
-# Statistiques
-summary(mariage_data$AGE1)  
-#  Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
-#  17.00   30.00   35.00   38.57   45.00   98.00 
-summary(mariage_data$AGE2)
-# Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
-# 17.0    28.0    33.0    36.5    43.0    92.0 
-
-ana_stat <-function(mariage_data) {
-  classes <- mariage_data %>% summarise_all(class) %>% t()
-  means <- mariage_data %>% select(!where(is.character)) %>% summarise_all(mean, na.rm=TRUE) %>% t()
-  vars <- mariage_data %>% select(!where(is.character)) %>% summarise_all(var, na.rm=TRUE) %>% t()
-  sds <- mariage_data %>% select(!where(is.character)) %>% summarise_all(sd, na.rm=TRUE) %>% t()
-  qs <- mariage_data %>% select(!where(is.character)) %>% summarise_all(quantile, na.rm=TRUE) %>% t()
-  colnames(qs) <- c("min", "q14", "median", "q34", "max")
-  is.nas <- df %>% is.na %>% as.data.frame %>% summarise_all(sum) %>% t()
-  
-  stat.1 <- data.frame(
-    rownames=rownames(classes),
-    classes=classes,
-    is.nas=is.nas,
-    is.not.nas=nrow(mariage_data)-is.nas
-  )
-  
-  stat.2 <- data.frame(
-    rownames=rownames(means),
-    means=means,
-    vars=vars,
-    sds=sds,
-    qs
-  )
-  
-  stat <- full_join(stat.1, stat.2, by="rownames")
-  
-  return(stat)
-}
-
-ana_cor <- function(mariage_data) {
-  r <- mariage_data %>% select(!where(is.character)) %>% cor
-  return(r)
-}
+#preparation de carte
+france<- map_data("france")
+View(france)
 
 
-
-###App
+#app
 
 ui <- fluidPage(
   #titre de l'app
@@ -286,11 +250,9 @@ ui <- fluidPage(
   hr(),
   p("Cette application est basée sur les données de mariage en 2018 en France par INSEE"),
   br(),
-  
   mainPanel(
     tabsetPanel(type = "tabs",
                 tabPanel("Data Table",
-                         
                          mainPanel(
                            #il faut modifier le nom de colonne
                            dataTableOutput("dataTable")
@@ -299,34 +261,53 @@ ui <- fluidPage(
                          h1("Statistique value"),
                          sidebarLayout(
                            sidebarPanel(
-                             selectInput("SEXE1", label = "sexe", choices = c("Femme", "Homme"))
+                             selectInput("col_select", "var_select", names(mariage_data))
                            ),
                            mainPanel(
-                             tableOutput(outputId = "countTable")
+                             verbatimTextOutput("total")
                            )
                          )
                 ),
-                #Hist     
+                #Hist(numeric)     
                 tabPanel("Histogram", h1("Histogram"),
                          plotOutput("hist"), 
-                         fluidRow(
-                           column(3, htmlOutput("hist.Bins")),
-                           column(4, htmlOutput("hist.X")),
-                           column(4, htmlOutput("hist.Fill"))
+                         conditionalPanel(
+                           condition = "input['hist.x'] !== undefined && $.isNumeric(input['hist.x'])",
+                           fluidRow(
+                             column(3, htmlOutput("hist.Bins")),
+                             column(4, htmlOutput("hist.X")),
+                             column(4, htmlOutput("hist.Fill"))
+                           )
                          )
-                )),
-    #Bar
-    tabPanel("bar", h1("Bar"),
-             plotOutput("bar"), 
-             fluidRow(
-               column(4, htmlOutput("bar.X")),
-               column(4, htmlOutput("bar.Fil"))
-             )
-    ),
-    tabPanel("Carte",h1("Carte"))
-  )
+                ),
+                
+                #Bar
+                tabPanel("bar", h1("Bar"),
+                         plotOutput("bar"), 
+                         fluidRow(
+                           column(4, htmlOutput("bar.X")),
+                           column(4, htmlOutput("bar.Fil"))
+                         )
+                ),
+                tabPanel("Carte",
+                         sidebarLayout(
+                           sidebarPanel(
+                             h3("Filtering data"),
+                             selectInput("dataset", "Choose a dataset (or a subset) :", 
+                                         choices = sort(c("all biggest cities", "Ile-de-France", "Provence-Alpes-Cote d'Azur", "Rhone-Alpes", 
+                                                          "Midi-Pyrenees", "Pays de la Loire", "Alsace", "Languedoc-Roussillon", "Aquitaine", "Nord-Pas-de-Calais")))
+                           ), 
+                           
+                           # MainPanel divided into 2 tabPanels
+                           mainPanel(
+                             tabsetPanel(
+                               tabPanel("Plot", h1("Carte"), leafletOutput("leafletMap", width = "100%", height="700")),
+                               tabPanel("Table", h1("Data"), tableOutput("table"))
+                             ) 
+                           )
+                         ))
+    ))
 )
-
 
 
 
@@ -343,39 +324,45 @@ server <- function(input, output) {
   })
   
   #Statistique
-  count <- reactive({
-    mariage_data %>%
-      filter(SEXE1 == input$SEXE1) %>%
-      group_by(AGE1) %>%
-      summarize(count = n())
+  output$total <- renderPrint({
+    col_name <- input$col_select
+    col_data <- mariage_data[[col_name]]
+    
+    if (is.numeric(col_data)) {
+      cat("Moyenne: ", mean(col_data), "\n")
+      cat("Minimum: ", min(col_data), "\n")
+      cat("Maximum: ", max(col_data), "\n")
+    } else {
+      cat("Resultat: \n")
+      table(col_data)
+    }
   })
   
-  # Resultat
-  output$countTable <- renderTable({
-    count()
-  })
-  
-  
-  #Histogram
-  output$hist.Bins <- renderUI({
-    sliderInput('hist.bins', 'bins', min=1, max=(round(nrow(data())/10)), value=(round(nrow(data())/20)))
-  })
-  
+  # Histogram
   output$hist.X <- renderUI({
-    selectInput('hist.x', 'x', names(data()))
+    selectInput('hist.x', 'x', names(data())[sapply(data(), is.numeric)])
   })
   
   output$hist.Fill <- renderUI({
-    selectInput('hist.fill', 'fill', c(None='None', names(data())))
+    selectInput('hist.fill', 'fill', c(None='None', names(data())), selected = NULL)
   })
   
   output$hist <- renderPlot({
-    g <- ggplot(data(), aes_string(x = input$hist.x)) + geom_histogram(bins = input$hist.bins)
-    if (input$hist.fill != 'None') {
-      g <- g + aes_string(fill = input$hist.fill)
+    req(input$hist.x)
+    
+    if (is.numeric(data()[[input$hist.x]])) {
+      g <- ggplot(data(), aes_string(x = input$hist.x)) + geom_histogram(bins = input$hist.bins)
+      if (input$hist.fill != 'None') {
+        req(input$hist.fill)
+        g <- g + aes_string(fill = input$hist.fill)
+      }
+      print(g)
+    } else {
+      plot(NULL, main = "Please select a numeric variable for histogram")
     }
-    print(g)
   })
+  
+  
   
   #bar
   output$bar.X <- renderUI({
@@ -393,6 +380,7 @@ server <- function(input, output) {
     }
     print(g)
   })
+  
   
   
   
