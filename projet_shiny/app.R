@@ -89,9 +89,9 @@ fct_freq_dep <- function(x){
                         "Alpes-de-Haute-Provence"="04",
                         "Hautes-Alpes"="05",
                         "Alpes-Maritimes"="06",
-                        "Ardeche"="07",
+                        "Ardèche"="07",
                         "Ardennes"="08",
-                        "Ariege"="09",
+                        "Ariège"="09",
                         "Aube"="10",
                         "Aude"="11",
                         "Aveyron"="12",
@@ -101,28 +101,28 @@ fct_freq_dep <- function(x){
                         "Charente"="16",
                         "Charente-Maritime"="17",
                         "Cher"="18",
-                        "Correze"="19",
+                        "Corrèze"="19",
                         "Corse"="20",
-                        "Corse du Sud"="2A",
+                        "Corse-du-Sud"="2A",
                         "Haute-Corse"="2B",
-                        "Cote-Dor"="21",
-                        "Cotes-Darmor"="22",
+                        "Côte-d'Or"="21",
+                        "Côtes-d'Armor"="22",
                         "Creuse"="23",
                         "Dordogne"="24",
                         "Doubs"="25",
-                        "Drome"="26",
+                        "Drôme"="26",
                         "Eure"="27",
                         "Eure-et-Loir"="28",
-                        "Finistere"="29",
+                        "Finistère"="29",
                         "Gard"="30",
                         "Haute-Garonne"="31",
                         "Gers"="32",
                         "Gironde"="33",
-                        "Herault"="34",
+                        "Hérault"="34",
                         "Ille-et-Vilaine"="35",
                         "Indre"="36",
                         "Indre-et-Loire"="37",
-                        "Isere"="38",
+                        "Isère"="38",
                         "Jura"="39",
                         "Landes"="40",
                         "Loir-et-Cher"="41",
@@ -132,7 +132,7 @@ fct_freq_dep <- function(x){
                         "Loiret"="45",
                         "Lot"="46",
                         "Lot-et-Garonne"="47",
-                        "Lozere"="48",
+                        "Lozère"="48",
                         "Maine-et-Loire"="49",
                         "Manche"="50",
                         "Marne"="51",
@@ -142,20 +142,20 @@ fct_freq_dep <- function(x){
                         "Meuse"="55",
                         "Morbihan"="56",
                         "Moselle"="57",
-                        "Nievre"="58",
+                        "Nièvre"="58",
                         "Nord"="59",
                         "Oise"="60",
                         "Orne"="61",
                         "Pas-de-Calais"="62",
-                        "Puy-de-Dome"="63",
-                        "Pyrenees-Atlantiques"="64",
-                        "Hautes-Pyrenees"="65",
-                        "Pyrenees-Orientales"="66",
+                        "Puy-de-Dôme"="63",
+                        "Pyrénées-Atlantiques"="64",
+                        "Hautes-Pyrénées"="65",
+                        "Pyrénées-Orientales"="66",
                         "Bas-Rhin"="67",
                         "Haut-Rhin"="68",
-                        "Rhone"="69",
-                        "Haute-Saone"="70",
-                        "Saone-et-Loire"="71",
+                        "Rhône"="69",
+                        "Haute-Saône"="70",
+                        "Saône-et-Loire"="71",
                         "Sarthe"="72",
                         "Savoie"="73",
                         "Haute-Savoie"="74",
@@ -163,13 +163,13 @@ fct_freq_dep <- function(x){
                         "Seine-Maritime"="76",
                         "Seine-et-Marne"="77",
                         "Yvelines"="78",
-                        "Deux-Sevres"="79",
+                        "Deux-Sèvres"="79",
                         "Somme"="80",
                         "Tarn"="81",
                         "Tarn-et-Garonne"="82",
                         "Var"="83",
                         "Vaucluse"="84",
-                        "Vendee"="85",
+                        "Vendée"="85",
                         "Vienne"="86",
                         "Haute-Vienne"="87",
                         "Vosges"="88",
@@ -179,9 +179,20 @@ fct_freq_dep <- function(x){
                         "Hauts-de-Seine"="92",
                         "Seine-Saint-Denis"="93",
                         "Val-de-Marne"="94",
-                        "Val-Doise"="95",
-                        "DOM-TOM"=c("971","972","973","974","975","976","977","978","984","985","986","987","988"),
-                        "Etranger"="99"
+                        "Val-d Oise"="95",
+                        "Guadeloupe"="971",
+                        "Martinique"="972",
+                        "Guyane"="973",
+                        "La Réunion"="974",
+                        "Saint-Pierre-et-Miquelon"="975",
+                        "Mayotte"=c("976","985"),
+                        "Saint-Barthélemy"="977",
+                        "Saint-Martin"="978",
+                        "Terres australes et antarctiques françaises"="984",
+                        "Wallis et Futuna"="986",
+                        "Polynésie française"="987",
+                        "Nouvelle-Calédonie"="988",
+                        "Étranger"="99"
   )
   return(recod)
 }
@@ -197,7 +208,7 @@ mariage$DEPNAIS2  <- fct_freq_dep(mariage$DEPNAIS2)
 #-> error: Adding missing grouping variables: `DEPNAIS2`
 
 mariage <- mariage %>%
-  select(SEXE1,SEXE2,AGE1,AGE2,INDNAT1,INDNAT2, ETAMAT1, ETAMAT2, NBENFCOM, AMAR, MMAR, DEPDOM,DEPMAR,DEPNAIS1,DEPNAIS2) %>%
+  select(SEXE1,SEXE2,AGE1,AGE2,INDNAT1,INDNAT2, ETAMAT1, ETAMAT2) %>%
   ungroup()
 
 
@@ -238,24 +249,13 @@ pop_fr <- pop_fr %>%
 rename(pop_marage = pop_fr.x, pop_domicile = pop_fr.y, pop_nais1=pop_fr.x.x, pop_nais2=pop_fr.y.y,departement = DEP)
 
 
-#preparation de carte
-france<- map_data("france")
-View(france)
-
-table(france$region)
-
-
-#mariage<-mariage %>%
-#  select(SEXE1,SEXE2,AGE1,AGE2,INDNAT1,INDNAT2, ETAMAT1, ETAMAT2,dep_mariage_count,dep_domicile_count,dep_nais1_count,dep_nais2_count,NBENFCOM,AMAR,MMAR )
-#-> error: Adding missing grouping variables: `DEPNAIS2`
-
 mariage <- mariage %>%
   select(SEXE1,SEXE2,AGE1,AGE2,INDNAT1,INDNAT2, ETAMAT1, ETAMAT2, NBENFCOM, AMAR, MMAR, DEPDOM,DEPMAR,DEPNAIS1,DEPNAIS2) %>%
   ungroup()
 
 
 write.csv(mariage,"mariage2018.csv", fileEncoding ="utf8")
-write.csv(mariage,"pop_fr.csv", fileEncoding ="utf8")
+write.csv(pop_fr,"pop_fr.csv", fileEncoding ="utf8")
 
 
 
@@ -274,9 +274,8 @@ library("geojsonio")
 #install.packages("Require")
 library("Require")
 library("lubridate")
-library("shinydashboard")
 library("rgdal")
-library("sp")
+library("sf")
 
 #########dataframe#####
 #setwd("C:/Users/white/OneDrive/Bureau/rh")
@@ -284,9 +283,18 @@ library("sp")
 
 # lire de data
 mariage_data<-read.csv("mariage2018.csv", sep = ",", fileEncoding ="utf8" )
-pop_fr<--read.csv("pop_fr.csv", sep = ",", fileEncoding ="utf8" )
-france <- geojson_read("a-dep2020-geojson.json", what = "sp")
-head(france)
+pop_fr<-read.csv("pop_fr.csv", sep = ",", fileEncoding ="utf8" )
+france <- st_read(dsn = "departements-20180101.shp")
+
+pop_dep <- unique(pop_fr$departement)
+france_dep <- unique(france$nom)
+
+common_dep <- intersect(pop_dep, france_dep)
+code_insee <- france$code_insee[match(common_dep, france_dep)]
+
+pop_fr <- pop_fr %>%
+  mutate(code_insee = code_insee[match(departement, common_dep)])
+
 
 #app
 
@@ -314,19 +322,9 @@ ui <- fluidPage(
                            mainPanel(
                              verbatimTextOutput("total"))
                          )),
-                #Hist(numeric)     
-                #tabPanel("Histogram", h1("Histogram"),
-                #         plotOutput("hist"), 
-                #         conditionalPanel(
-                #           condition = "input['hist.x'] !== undefined && $.isNumeric(input['hist.x'])",
-                #           fluidRow(
-                #             column(3, htmlOutput("hist.Bins")),
-                #             column(4, htmlOutput("hist.X")),
-                #             column(4, htmlOutput("hist.Fill"))
-                #           ))),
                 
                 #Bar
-                tabPanel("bar", h1("Bar"),
+                tabPanel("Bar", h1("Bar"),
                          plotOutput("bar"), 
                          fluidRow(
                            column(4, htmlOutput("bar.X")),
@@ -334,7 +332,7 @@ ui <- fluidPage(
                          )),
                 #Carte
                 tabPanel("Carte",h1("Carte"),
-                         leafletOutput("map")
+                         leafletOutput(outputId = "map")
                 )
     )
   )
@@ -373,32 +371,7 @@ server <- function(input, output) {
       table(col_data)
     }
   })
-  
-  # Histogram
-  #output$hist.X <- renderUI({
-  #  selectInput('hist.x', 'x', names(data())[sapply(data(), is.numeric)])
-  #})
-  
-  #output$hist.Fill <- renderUI({
-  #  selectInput('hist.fill', 'fill', c(None='None', names(data())), selected = NULL)
-  #})
-  
-  #output$hist <- renderPlot({
-  #  req(input$hist.x)
-    
-  #  if (is.numeric(data()[[input$hist.x]])) {
-  #    g <- ggplot(data(), aes_string(x = input$hist.x)) + geom_histogram(bins = input$hist.bins)
-  #   if (input$hist.fill != 'None') {
-  #      req(input$hist.fill)
-  #      g <- g + aes_string(fill = input$hist.fill)
-  #    }
-  #    print(g)
-  #  } else {
-  #    plot(NULL, main = "Please select a numeric variable for histogram")
-  #  }
-  #})
-  
-  
+ 
   
   #bar
   output$bar.X <- renderUI({
@@ -420,20 +393,20 @@ server <- function(input, output) {
   
   #Carte
   #montre map france
+  # Carte
+  # montre map france
   output$map <- renderLeaflet({
-    leaflet() %>%
+    leaflet(data = map()) %>%
       addTiles() %>%
-      addPolygons(
-        data = mariage_data,
-        fillColor = "red",
-        color = "black",
-        weight = 1,
-        fillOpacity = 0.7,
-        popup = ~paste(name)
-      )
+      addPolygons(fillColor = "white", color = "#444444", weight = 1, fillOpacity = 0.5) %>%
+      addPolygons(data = pop(), fillColor = "red", color = "#444444", weight = 1, fillOpacity = 0.5, 
+                  popup = paste("Code INSEE:", pop()$code_insee, "<br>", 
+                                "Département:", pop()$departement, "<br>",
+                                "Population de mariage:", pop()$pop_mariage))
   })
   
 }
+  
 
 
 
