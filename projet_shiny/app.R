@@ -83,13 +83,13 @@ mariage$AGE2 <- 2018 - mariage$ANAIS2
 
 fct_freq_dep <- function(x){
   recod <- fct_collapse(factor(x),
-                        "01 : Ain"="01",
-                        "02 : Aisne"="02",
-                        "03 : Allier"="03",
-                        "04 : Alpes-de-Haute-Provence"="04",
+                        "Ain"="01",
+                        "Aisne"="02",
+                        "Allier"="03",
+                        "Alpes-de-Haute-Provence"="04",
                         "05 : Hautes-Alpes"="05",
-                        "06 : Alpes-Maritimes"="06",
-                        "07 : Ardèche"="07",
+                        "Alpes-Maritimes"="06",
+                        "Ardèche"="07",
                         "08 : Ardennes"="08",
                         "09 : Ariège"="09",
                         "10 : Aube"="10",
@@ -252,6 +252,9 @@ ui <- fluidPage(
   br(),
   mainPanel(
     tabsetPanel(type = "tabs",
+                tabPanel("But", h1(kkkkkk),
+                         p(fffff)),
+                
                 tabPanel("Data Table",
                          mainPanel(
                            #il faut modifier le nom de colonne
