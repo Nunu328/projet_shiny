@@ -291,8 +291,8 @@ ui <- fluidPage(
                          combien de groupes existent pour chaque variable et compter le nombre de 
                          chacun d'entre eux."),
                          p("La rubrique Bar permet d'afficher un diagramme en barres."),
-                         p("Dans x, vous sélectionnez la variable qui sera l'axe des abscisses, et bar.Fil est le filtre."),
-                         p("Enfin, La rubrique Carte affiche la population mariée par département."),
+                         p("Dans x, vous sélectionnez la variable qui sera l'axe des abscisses, et Bar.fil est le filtre."),
+                         p("Enfin, La rubrique Camembert,Le camembert peut vous indiquer les proportions des variables. Sélectionnez la variable de votre choix dans la barre de sélection."),
                          hr(),
                          h2("Donnée et variables"),
                          p("Voici la liste des variables dans ce jeu des données:"),
@@ -340,12 +340,12 @@ ui <- fluidPage(
                          selectInput(inputId = "variable", label = "Select a variable:",
                                      choices = c("SEXE1", "SEXE2", "INDNAT1", "INDNAT2", "ETAMAT1", "ETAMAT2")),
                          plotOutput(outputId = "pie_chart")
-                ),
+                )
                 
                 #Carte
-                tabPanel("Carte",h1("Carte"),
-                         leafletOutput(outputId = "map")
-                )
+                #tabPanel("Carte",h1("Carte"),
+                #         leafletOutput(outputId = "map")
+                #)
     )
   )
 )
@@ -417,15 +417,15 @@ server <- function(input, output) {
 
   # Carte
   # montre map france
-  output$map <- renderLeaflet({
-    leaflet(data = map()) %>%
-      addTiles() %>%
-      addPolygons(fillColor = "white", color = "#444444", weight = 1, fillOpacity = 0.5) %>%
-      addPolygons(data = pop(), fillColor = "red", color = "#444444", weight = 1, fillOpacity = 0.5, 
-                  popup = paste("Code INSEE:", pop()$code_insee, "<br>", 
-                                "Département:", pop()$departement, "<br>",
-                                "Population de mariage:", pop()$pop_mariage))
-  })
+  #output$map <- renderLeaflet({
+    #leaflet(data = map()) %>%
+     # addTiles() %>%
+      #addPolygons(fillColor = "white", color = "#444444", weight = 1, fillOpacity = 0.5) %>%
+      #addPolygons(data = pop(), fillColor = "red", color = "#444444", weight = 1, fillOpacity = 0.5, 
+       #           popup = paste("Code INSEE:", pop()$code_insee, "<br>", 
+        #                        "Département:", pop()$departement, "<br>",
+         #                       "Population de mariage:", pop()$pop_mariage))
+  #})
   
 }
 
