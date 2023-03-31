@@ -1,37 +1,28 @@
-#
-# This is a Shiny web application. You can run the application by clicking
-# the 'Run App' button above.
-#
-# Find out more about building applications with Shiny here:
-#
-#    http://shiny.rstudio.com/
-#
-######################
-#    projet_shiny    #
-######################
-# une application 
-# - point
-#   +automatique
-#   +au moins d'une grapique
-
-
-
-
+###telecharger des library
+library("shiny")
+library("tidyverse")
+library("questionr")
+library("dplyr")
+library("forcats")
+library("datasets")
+#library("pacman")
+library("DT")
+library("ggplot2")
+library("leaflet")
+#library("magrittr")
+library("geojsonio")
+#library("Require")
+#library("lubridate")
+library("rgdal")
+library("sf")
 
 ###nettoyer des bdds
 
-##1: telecharger des library
-#install.packages("pacman") 
-library(tidyverse)
-library(questionr)
-library(shiny)
-
-
-##2: telecharger une donnée
+##1: telecharger une donnée
 mariage<-read.csv("FD_MAR_2018.csv", sep = ";", fileEncoding ="utf8" )
 str(mariage)
 
-##3: recodage de sexe
+##2: recodage de sexe
 
 fct_freq_sexe <- function(x){
   recod <- fct_collapse(factor(x),
@@ -49,7 +40,7 @@ round(table(mariage$SEXE2, useNA = "ifany") %>%
         prop.table()*100,1)#<<
 
 
-##4: recodage de l'etat matrimonial antérieur 
+##3: recodage de l'etat matrimonial antérieur 
 
 fct_freq_etat_matriimonial <- function(x){
   recod <- fct_collapse(factor(x),
@@ -62,7 +53,7 @@ fct_freq_etat_matriimonial <- function(x){
 mariage$ETAMAT1 <- fct_freq_etat_matriimonial(mariage$ETAMAT1 )
 mariage$ETAMAT2 <- fct_freq_etat_matriimonial(mariage$ETAMAT2 )
 
-#Recodage de la nationalité
+##4Recodage de la nationalité
 
 fct_freq_natio <- function(x){
   recod <- fct_collapse(factor(x),
@@ -74,12 +65,12 @@ fct_freq_natio <- function(x){
 mariage$INDNAT1 <- fct_freq_natio(mariage$INDNAT1)
 mariage$INDNAT2 <- fct_freq_natio(mariage$INDNAT2)
 
-#Recodage de l'age
+##5Recodage de l'age
 mariage$AGE1 <- 2018 - mariage$ANAIS1
 mariage$AGE2 <- 2018 - mariage$ANAIS2
 
 
-#Recodage de Département
+##6Recodage de Département
 
 fct_freq_dep <- function(x){
   recod <- fct_collapse(factor(x),
@@ -203,20 +194,12 @@ mariage$DEPNAIS1  <- fct_freq_dep(mariage$DEPNAIS1)
 mariage$DEPNAIS2  <- fct_freq_dep(mariage$DEPNAIS2)
 
 
-#mariage<-mariage %>%
-#  select(SEXE1,SEXE2,AGE1,AGE2,INDNAT1,INDNAT2, ETAMAT1, ETAMAT2,dep_mariage_count,dep_domicile_count,dep_nais1_count,dep_nais2_count,NBENFCOM,AMAR,MMAR )
-#-> error: Adding missing grouping variables: `DEPNAIS2`
-
 mariage <- mariage %>%
-  select(SEXE1,SEXE2,AGE1,AGE2,INDNAT1,INDNAT2, ETAMAT1, ETAMAT2) %>%
+  select(SEXE1,SEXE2,AGE1,AGE2,INDNAT1,INDNAT2, ETAMAT1, ETAMAT2, NBENFCOM, AMAR, MMAR, DEPDOM,DEPMAR,DEPNAIS1,DEPNAIS2) %>%
   ungroup()
 
 
-#regoupe de region et creer un nouveau df
-
-
-library(dplyr)
-library(forcats)
+##7regoupe de region et creer un nouveau df
 
 pop_DEPMAR <- mariage %>%
   count(DEPMAR, name = "pop_DEPMAR") %>%
@@ -250,7 +233,7 @@ rename(pop_marage = pop_fr.x, pop_domicile = pop_fr.y, pop_nais1=pop_fr.x.x, pop
 
 
 mariage <- mariage %>%
-  select(SEXE1,SEXE2,AGE1,AGE2,INDNAT1,INDNAT2, ETAMAT1, ETAMAT2, NBENFCOM, AMAR, MMAR, DEPDOM,DEPMAR,DEPNAIS1,DEPNAIS2) %>%
+  select(SEXE1,SEXE2,AGE1,AGE2,INDNAT1,INDNAT2, ETAMAT1, ETAMAT2) %>%
   ungroup()
 
 
@@ -261,25 +244,8 @@ write.csv(pop_fr,"pop_fr.csv", fileEncoding ="utf8")
 
 
 #########Application###########
-###telecharger des library
-library("shiny")
-library("datasets")
-library("pacman")
-library("DT")
-library("dplyr")
-library("ggplot2")
-library("leaflet")
-library("magrittr")
-library("geojsonio")
-#install.packages("Require")
-library("Require")
-library("lubridate")
-library("rgdal")
-library("sf")
 
 #########dataframe#####
-#setwd("C:/Users/white/OneDrive/Bureau/rh")
-
 
 # lire de data
 mariage_data<-read.csv("mariage2018.csv", sep = ",", fileEncoding ="utf8" )
