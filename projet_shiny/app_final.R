@@ -23,6 +23,8 @@ library("geojsonio")
 #library("lubridate")
 library("rgdal")
 library("sf")
+#install.packages("plotly")
+library("plotly")
 
 ###nettoyer des bdds
 
@@ -278,14 +280,17 @@ ui <- fluidPage(
     tabsetPanel(type = "tabs",
                 tabPanel("But", h1("Présentation de base donnée"),
                          p("Nous avons décidé de faire une analyse quantitative sur les mariages célébrés."),
-                         p("On va regarder les informations générales sur le jeu de données de l’état civil en 2018
-                         concernant les mariages fourni par l’INSEE."),
-                         P("url:https://www.insee.fr/fr/statistiques/4273672?sommaire=4273674"),
+                         p("On va regarder les informations générales sur le jeu de données de l’état civil en 2018 concernant les mariages fourni par l’INSEE."),
+                         p("Url:https://www.insee.fr/fr/statistiques/4273672?sommaire=4273674 "),
                          hr(),
                          h2("Utilisation"),
                          p("La rubrique Data Table permet d'obtenir une vue détaillée des données utilisées."),
-                         p("Dans la rubrique statistiques, si vous sélectionnez une variable dans la boîte de sélection, vous pouvez voir la moyenne, les valeurs maximales et minimales pour les variables de type numérique. Dans le cas des variables de type texte, vous pouvez voir combien de groupes existent pour chaque variable et compter le nombre de chacun d'entre eux.
-                         La rubrique Bar permet d'afficher un diagramme en barres."),
+                         p("Dans la rubrique statistiques, si vous sélectionnez une variable dans la boîte de
+                         sélection, vous pouvez voir la moyenne, les valeurs maximales et minimales pour les
+                         variables de type numérique. Dans le cas des variables de type texte, vous pouvez voir
+                         combien de groupes existent pour chaque variable et compter le nombre de 
+                         chacun d'entre eux."),
+                         p("La rubrique Bar permet d'afficher un diagramme en barres."),
                          p("Dans x, vous sélectionnez la variable qui sera l'axe des abscisses, et bar.Fil est le filtre."),
                          p("Enfin, La rubrique Carte affiche la population mariée par département."),
                          hr(),
@@ -330,6 +335,13 @@ ui <- fluidPage(
                            column(4, htmlOutput("bar.X")),
                            column(4, htmlOutput("bar.Fil"))
                          )),
+                # Camembert
+                tabPanel("Camembert", p("Sélectionnez la variable dont vous voulez connaître le pourcentage."),
+                         selectInput(inputId = "variable", label = "Select a variable:",
+                                     choices = c("SEXE1", "SEXE2", "INDNAT1", "INDNAT2", "ETAMAT1", "ETAMAT2")),
+                         plotOutput(outputId = "pie_chart")
+                ),
+                
                 #Carte
                 tabPanel("Carte",h1("Carte"),
                          leafletOutput(outputId = "map")
@@ -390,6 +402,17 @@ server <- function(input, output) {
     print(g)
   })
   
+  #Camembert
+  output$pie_chart <- renderPlot({
+    ggplot(mariage_data, aes(x = "", fill = !!sym(input$variable))) +
+      geom_bar(width = 1) +
+      coord_polar("y", start = 0) +
+      labs(fill = input$variable) +
+      theme_void()
+  })
+
+  
+
   
 
   # Carte
