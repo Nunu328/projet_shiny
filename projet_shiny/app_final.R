@@ -1,11 +1,3 @@
-#
-# This is a Shiny web application. You can run the application by clicking
-# the 'Run App' button above.
-#
-# Find out more about building applications with Shiny here:
-#
-#    http://shiny.rstudio.com/
-#
 ######################
 #    projet_shiny    #
 ######################
@@ -14,24 +6,31 @@
 #   +automatique
 #   +au moins d'une grapique
 
-
-
-
+###telecharger des library
+library("shiny")
+library("tidyverse")
+library("questionr")
+library("dplyr")
+library("forcats")
+library("datasets")
+#library("pacman")
+library("DT")
+library("ggplot2")
+library("leaflet")
+#library("magrittr")
+library("geojsonio")
+#library("Require")
+#library("lubridate")
+library("rgdal")
+library("sf")
 
 ###nettoyer des bdds
 
-##1: telecharger des library
-#install.packages("pacman") 
-library(tidyverse)
-library(questionr)
-library(shiny)
-
-
-##2: telecharger une donnée
+##1: telecharger une donnée
 mariage<-read.csv("FD_MAR_2018.csv", sep = ";", fileEncoding ="utf8" )
 str(mariage)
 
-##3: recodage de sexe
+##2: recodage de sexe
 
 fct_freq_sexe <- function(x){
   recod <- fct_collapse(factor(x),
@@ -49,7 +48,7 @@ round(table(mariage$SEXE2, useNA = "ifany") %>%
         prop.table()*100,1)#<<
 
 
-##4: recodage de l'etat matrimonial antérieur 
+##3: recodage de l'etat matrimonial antérieur 
 
 fct_freq_etat_matriimonial <- function(x){
   recod <- fct_collapse(factor(x),
@@ -62,7 +61,7 @@ fct_freq_etat_matriimonial <- function(x){
 mariage$ETAMAT1 <- fct_freq_etat_matriimonial(mariage$ETAMAT1 )
 mariage$ETAMAT2 <- fct_freq_etat_matriimonial(mariage$ETAMAT2 )
 
-#Recodage de la nationalité
+##4Recodage de la nationalité
 
 fct_freq_natio <- function(x){
   recod <- fct_collapse(factor(x),
@@ -74,12 +73,12 @@ fct_freq_natio <- function(x){
 mariage$INDNAT1 <- fct_freq_natio(mariage$INDNAT1)
 mariage$INDNAT2 <- fct_freq_natio(mariage$INDNAT2)
 
-#Recodage de l'age
+##5Recodage de l'age
 mariage$AGE1 <- 2018 - mariage$ANAIS1
 mariage$AGE2 <- 2018 - mariage$ANAIS2
 
 
-#Recodage de Département
+##6Recodage de Département
 
 fct_freq_dep <- function(x){
   recod <- fct_collapse(factor(x),
@@ -203,20 +202,12 @@ mariage$DEPNAIS1  <- fct_freq_dep(mariage$DEPNAIS1)
 mariage$DEPNAIS2  <- fct_freq_dep(mariage$DEPNAIS2)
 
 
-#mariage<-mariage %>%
-#  select(SEXE1,SEXE2,AGE1,AGE2,INDNAT1,INDNAT2, ETAMAT1, ETAMAT2,dep_mariage_count,dep_domicile_count,dep_nais1_count,dep_nais2_count,NBENFCOM,AMAR,MMAR )
-#-> error: Adding missing grouping variables: `DEPNAIS2`
-
 mariage <- mariage %>%
-  select(SEXE1,SEXE2,AGE1,AGE2,INDNAT1,INDNAT2, ETAMAT1, ETAMAT2) %>%
+  select(SEXE1,SEXE2,AGE1,AGE2,INDNAT1,INDNAT2, ETAMAT1, ETAMAT2, NBENFCOM, AMAR, MMAR, DEPDOM,DEPMAR,DEPNAIS1,DEPNAIS2) %>%
   ungroup()
 
 
-#regoupe de region et creer un nouveau df
-
-
-library(dplyr)
-library(forcats)
+##7regoupe de region et creer un nouveau df
 
 pop_DEPMAR <- mariage %>%
   count(DEPMAR, name = "pop_DEPMAR") %>%
@@ -250,7 +241,7 @@ pop_fr <- pop_fr %>%
 
 
 mariage <- mariage %>%
-  select(SEXE1,SEXE2,AGE1,AGE2,INDNAT1,INDNAT2, ETAMAT1, ETAMAT2, NBENFCOM, AMAR, MMAR, DEPDOM,DEPMAR,DEPNAIS1,DEPNAIS2) %>%
+  select(SEXE1,SEXE2,AGE1,AGE2,INDNAT1,INDNAT2, ETAMAT1, ETAMAT2) %>%
   ungroup()
 
 
@@ -259,28 +250,7 @@ write.csv(pop_fr,"pop_fr.csv", fileEncoding ="utf8")
 
 
 
-
-#########Application###########
-###telecharger des library
-library("shiny")
-library("datasets")
-library("pacman")
-library("DT")
-library("dplyr")
-library("ggplot2")
-library("leaflet")
-library("magrittr")
-library("geojsonio")
-#install.packages("Require")
-library("Require")
-library("lubridate")
-library("rgdal")
-library("sf")
-
 #########dataframe#####
-#setwd("C:/Users/white/OneDrive/Bureau/rh")
-
-
 # lire de data
 mariage_data<-read.csv("mariage2018.csv", sep = ",", fileEncoding ="utf8" )
 pop_fr<-read.csv("pop_fr.csv", sep = ",", fileEncoding ="utf8" )
@@ -306,8 +276,36 @@ ui <- fluidPage(
   br(),
   mainPanel(
     tabsetPanel(type = "tabs",
-                tabPanel("But", h1("title"),
-                         p("explication")),
+                tabPanel("But", h1("Présentation de base donnée"),
+                         p("Nous avons décidé de faire une analyse quantitative sur les mariages célébrés."),
+                         p("On va regarder les informations générales sur le jeu de données de l’état civil en 2018
+                         concernant les mariages fourni par l’INSEE."),
+                         hr(),
+                         h2("Utilisation"),
+                         p("La rubrique Data Table permet d'obtenir une vue détaillée des données utilisées."),
+                         p("Dans la rubrique statistiques, si vous sélectionnez une variable dans la boîte de sélection, vous pouvez voir la moyenne, les valeurs maximales et minimales pour les variables de type numérique. Dans le cas des variables de type texte, vous pouvez voir combien de groupes existent pour chaque variable et compter le nombre de chacun d'entre eux.
+                         La rubrique Bar permet d'afficher un diagramme en barres."),
+                         p("Dans x, vous sélectionnez la variable qui sera l'axe des abscisses, et bar.Fil est le filtre."),
+                         p("Enfin, La rubrique Carte affiche la population mariée par département."),
+                         hr(), 
+                         p("Voici la liste des variables dans ce jeu des données:"),
+                         p("1.AMAR Année de mariage"),
+                         p("2.ANAIS1 Année de naissance du conjoint 1"),
+                         p("3.ANAIS2 Année de naissance du conjoint 2"),
+                         p("3.DEPDOM Département de domicile après le mariage"),
+                         p("4.DEPMAR Département de mariage"),
+                         p("5.DEPNAIS1 Département de naissance du conjoint 1"),
+                         p("6.DEPNAIS2 Département de naissance du conjoint 2"),
+                         p("7.ETAMAT1 État matrimonial antérieur du conjoint 1"),
+                         p("8.ETAMAT2 État matrimonial antérieur du conjoint 2"),
+                         p("9.INDNAT1 Indicateur de nationalité du conjoint 1"),
+                         p("10.INDNAT2 Indicateur de nationalité du conjoint 2"),
+                         p("11.JSEMAINE Jour de mariage dans la semaine"),
+                         p("12.MMAR Mois de mariage : 01-12"),
+                         p("13.NBENFCOM Enfants en commun avant le mariage"),
+                         p("14.SEXE1 Sexe du conjoint 1"),
+                         p("15.SEXE2 Sexe du conjoint 2")),
+                
                 
                 tabPanel("Data Table",
                          mainPanel(
@@ -318,7 +316,7 @@ ui <- fluidPage(
                          h1("Statistique value"),
                          sidebarLayout(
                            sidebarPanel(
-                             selectInput("col_select", "var_select", names(mariage_data))),
+                             selectInput("col_select", "choix de variable", names(mariage_data))),
                            mainPanel(
                              verbatimTextOutput("total"))
                          )),
@@ -391,8 +389,7 @@ server <- function(input, output) {
   })
   
   
-  #Carte
-  #montre map france
+
   # Carte
   # montre map france
   output$map <- renderLeaflet({
