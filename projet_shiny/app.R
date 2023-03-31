@@ -246,9 +246,9 @@ View(france)
 
 ui <- fluidPage(
   #titre de l'app
-  titlePanel("L’étude sur les mariages dans le Nord en 2018"),
+  titlePanel("L’étude sur les mariages dans en France en 2018"),
   hr(),
-  p("Cette application est basée sur les données de mariage en 2018 en France par INSEE"),
+  p("Cette application est basée sur les données de l'état civil en 2018 en France par INSEE"),
   br(),
   mainPanel(
     tabsetPanel(type = "tabs",
