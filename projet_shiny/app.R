@@ -257,20 +257,8 @@ mariage <- mariage %>%
 write.csv(mariage,"mariage2018.csv", fileEncoding ="utf8")
 write.csv(mariage,"pop_fr.csv", fileEncoding ="utf8")
 
-#########dataframe#####
-#setwd("C:/Users/white/OneDrive/Bureau/rh")
-#install.packages("Require")
-library(Require)
-library(lubridate)
-
-#Preparation de la Carte en France
-#install.packages("maps")
-library(maps)
 
 
-# lire de data
-mariage_data<-read.csv("mariage2018.csv", sep = ",", fileEncoding ="utf8" )
-pop_fr<--read.csv("pop_fr.csv", sep = ",", fileEncoding ="utf8" )
 
 #########Application###########
 ###telecharger des library
@@ -281,10 +269,24 @@ library("DT")
 library("dplyr")
 library("ggplot2")
 library("leaflet")
-library(magrittr)
+library("magrittr")
+library("geojsonio")
+#install.packages("Require")
+library("Require")
+library("lubridate")
+library("shinydashboard")
+library("rgdal")
+library("sp")
+
+#########dataframe#####
+#setwd("C:/Users/white/OneDrive/Bureau/rh")
 
 
-
+# lire de data
+mariage_data<-read.csv("mariage2018.csv", sep = ",", fileEncoding ="utf8" )
+pop_fr<--read.csv("pop_fr.csv", sep = ",", fileEncoding ="utf8" )
+france <- geojson_read("a-dep2020-geojson.json", what = "sp")
+head(france)
 
 #app
 
@@ -313,15 +315,16 @@ ui <- fluidPage(
                              verbatimTextOutput("total"))
                          )),
                 #Hist(numeric)     
-                tabPanel("Histogram", h1("Histogram"),
-                         plotOutput("hist"), 
-                         conditionalPanel(
-                           condition = "input['hist.x'] !== undefined && $.isNumeric(input['hist.x'])",
-                           fluidRow(
-                             column(3, htmlOutput("hist.Bins")),
-                             column(4, htmlOutput("hist.X")),
-                             column(4, htmlOutput("hist.Fill"))
-                           ))),
+                #tabPanel("Histogram", h1("Histogram"),
+                #         plotOutput("hist"), 
+                #         conditionalPanel(
+                #           condition = "input['hist.x'] !== undefined && $.isNumeric(input['hist.x'])",
+                #           fluidRow(
+                #             column(3, htmlOutput("hist.Bins")),
+                #             column(4, htmlOutput("hist.X")),
+                #             column(4, htmlOutput("hist.Fill"))
+                #           ))),
+                
                 #Bar
                 tabPanel("bar", h1("Bar"),
                          plotOutput("bar"), 
@@ -330,7 +333,9 @@ ui <- fluidPage(
                            column(4, htmlOutput("bar.Fil"))
                          )),
                 #Carte
-                tabPanel("Carte",h1("Carte"))
+                tabPanel("Carte",h1("Carte"),
+                         leafletOutput("map")
+                )
     )
   )
 )
@@ -346,6 +351,9 @@ server <- function(input, output) {
     pop_fr
   })
   
+  map <- reactive({
+    france
+  })
   # Render data table
   output$dataTable <- renderDataTable({
     data()
@@ -367,28 +375,28 @@ server <- function(input, output) {
   })
   
   # Histogram
-  output$hist.X <- renderUI({
-    selectInput('hist.x', 'x', names(data())[sapply(data(), is.numeric)])
-  })
+  #output$hist.X <- renderUI({
+  #  selectInput('hist.x', 'x', names(data())[sapply(data(), is.numeric)])
+  #})
   
-  output$hist.Fill <- renderUI({
-    selectInput('hist.fill', 'fill', c(None='None', names(data())), selected = NULL)
-  })
+  #output$hist.Fill <- renderUI({
+  #  selectInput('hist.fill', 'fill', c(None='None', names(data())), selected = NULL)
+  #})
   
-  output$hist <- renderPlot({
-    req(input$hist.x)
+  #output$hist <- renderPlot({
+  #  req(input$hist.x)
     
-    if (is.numeric(data()[[input$hist.x]])) {
-      g <- ggplot(data(), aes_string(x = input$hist.x)) + geom_histogram(bins = input$hist.bins)
-      if (input$hist.fill != 'None') {
-        req(input$hist.fill)
-        g <- g + aes_string(fill = input$hist.fill)
-      }
-      print(g)
-    } else {
-      plot(NULL, main = "Please select a numeric variable for histogram")
-    }
-  })
+  #  if (is.numeric(data()[[input$hist.x]])) {
+  #    g <- ggplot(data(), aes_string(x = input$hist.x)) + geom_histogram(bins = input$hist.bins)
+  #   if (input$hist.fill != 'None') {
+  #      req(input$hist.fill)
+  #      g <- g + aes_string(fill = input$hist.fill)
+  #    }
+  #    print(g)
+  #  } else {
+  #    plot(NULL, main = "Please select a numeric variable for histogram")
+  #  }
+  #})
   
   
   
@@ -411,16 +419,23 @@ server <- function(input, output) {
   
   
   #Carte
-  #montre la data pop_fr
-  
-  #output$dataTablePop <- renderDataTable({
-   # pop()
-  #})
-  
-  
-  
+  #montre map france
+  output$map <- renderLeaflet({
+    leaflet() %>%
+      addTiles() %>%
+      addPolygons(
+        data = mariage_data,
+        fillColor = "red",
+        color = "black",
+        weight = 1,
+        fillOpacity = 0.7,
+        popup = ~paste(name)
+      )
+  })
   
 }
+
+
 
 # Run the app
 shinyApp(ui, server)
